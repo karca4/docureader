@@ -11,10 +11,3 @@ class DocumentInfo:
   author: Optional[str]
   year: Optional[int]
   producer: Optional[str]
-
-
-@dataclasses.dataclass
-class Occurrence:
-  page: int
-  phrase: str
-  text: str

@@ -1,4 +1,3 @@
-import abc
 import logging
 import re
 import traceback
@@ -7,23 +6,12 @@ from typing import Optional, List
 
 from PyPDF2 import PdfReader
 
-from model import DocumentInfo, Occurrence
+from model.DocumentInfo import DocumentInfo
+from model.Occurrence import Occurrence
+from reader.DocumentReader import DocumentReader
+from reader.search import find_phrase_containing_index, find_text_containing_index
 
 logger = logging.getLogger()
-
-
-class DocumentReader(abc.ABC):
-  @abc.abstractmethod
-  def get_filename(self) -> str:
-    pass
-
-  @abc.abstractmethod
-  def get_metadata_info(self) -> Optional[DocumentInfo]:
-    pass
-
-  @abc.abstractmethod
-  def find_all_occurrences(self, to_find: str, keyword_offset: int = 250) -> List[Occurrence]:
-    pass
 
 
 class PDFDocumentReader(DocumentReader):
@@ -39,9 +27,12 @@ class PDFDocumentReader(DocumentReader):
   def get_filename(self):
     return self.filename
 
+  def get_pages_number(self) -> int:
+    return len(self.__file.pages)
+
   def __metadata_info(self):
     meta = self.__file.metadata
-    subject, title, keywords, pages, author, year, producer = None, None, None, None, None, None, None
+    subject, title, keywords, author, year, producer = None, None, None, None, None, None
 
     try:
       year = meta.creation_date.year
@@ -57,7 +48,7 @@ class PDFDocumentReader(DocumentReader):
       author = meta.author
       producer = meta.producer
 
-    self.__info = DocumentInfo(subject, title, keywords, self.__file.getNumPages(), author, year, producer)
+    self.__info = DocumentInfo(subject, title, keywords, self.get_pages_number(), author, year, producer)
 
   def get_metadata_info(self):
     return self.__info
@@ -75,29 +66,13 @@ class PDFDocumentReader(DocumentReader):
         logger.debug(f"Occurrences found in page {page_number}: {occurrences_idx}")
         for index in occurrences_idx:
           phrase = find_phrase_containing_index(text, index)
+          text_block = find_text_containing_index(text, index, keyword_offset)
 
           logger.debug(f"Phrase: {phrase}")
-          logger.debug(f"Text: {text[index - keyword_offset:index + keyword_offset]}")
+          logger.debug(f"Text: {text_block}")
 
           occurrences.append(Occurrence(page_number + 1, phrase, text[index - keyword_offset:index + keyword_offset]))
       else:
         logger.debug(f"No occurrences found in page {page_number}")
         pass
     return occurrences
-
-
-def find_phrase_containing_index(text: str, index: int):
-  start_index = index
-  end_index = index
-
-  while True:
-    start_index = start_index - 1
-    if text[start_index] == "." or start_index == 0:
-      break
-  while True:
-    end_index = end_index + 1
-    if text[end_index] == "." or end_index == len(text) - 1:
-      break
-
-  # +1 in start index to remove '.' character. +1 in end index to add '.' character
-  return text[start_index + 1:end_index + 1]

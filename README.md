@@ -106,3 +106,12 @@ optional arguments:
   -r RESULT_PATH, --result_path RESULT_PATH
                         Directory path containing results
 ```
+
+# Test
+Unit test in directory **tests**.
+
+Launch test through:
+
+```shell
+python -m pytest tests/
+```

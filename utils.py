@@ -1,7 +1,8 @@
 import os
 from typing import Generator, List
 
-from model import Occurrence, DocumentInfo
+from model.DocumentInfo import DocumentInfo
+from model.Occurrence import Occurrence
 
 
 def get_filenames_from_path(path: str) -> Generator[str, None, None]:

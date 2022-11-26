@@ -3,7 +3,8 @@ import logging
 from datetime import datetime
 from typing import Optional, List
 
-from document_reader import PDFDocumentReader, DocumentReader
+from reader.PDFDocumentReader import PDFDocumentReader
+from reader.DocumentReader import DocumentReader
 from model import DocumentInfo, Occurrence
 from utils import get_filenames_from_path, write_file_result
 
