@@ -17,7 +17,7 @@ def work(key_to_search: str, path_dir: str, result_path_dir: str):
   reader: DocumentReader
   logger.info(f"Work in path {path_dir}")
   logger.info(f"Search for key: {key_to_search}")
-  result_file = f"{result_path_dir}/{key_to_search}{start_datetime.strftime('%m-%d-%Y,%H:%M:%S.%f')[:-3]}.txt"
+  result_file_path = f"{result_path_dir}/{key_to_search}{start_datetime.strftime('%m-%d-%Y,%H:%M:%S.%f')[:-3]}.txt"
 
   for filename in get_filenames_from_path(path_dir):
     info: Optional[DocumentInfo]
@@ -26,13 +26,14 @@ def work(key_to_search: str, path_dir: str, result_path_dir: str):
     if filename.split(".")[-1] == "pdf":
       logger.info(f"Analyzing PDF: {filename}")
       reader = PDFDocumentReader(f"{path_dir}/{filename}")
-      info = reader.get_info()
+      info = reader.get_metadata_info()
+      analyzed_filename = reader.get_filename()
       occurrences = reader.find_all_occurrences(key_to_search)
 
-      write_file_result(result_file, info, occurrences)
+      write_file_result(result_file_path, analyzed_filename, info, occurrences)
     else:
       logger.info(f"Discard no PDF file: {filename}")
-  logger.info(f"Results available in file: {result_file}")
+  logger.info(f"Results available in file: {result_file_path}")
   logger.info(f"Execution time: {datetime.now()-start_datetime}")
 
 

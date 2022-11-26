@@ -2,6 +2,7 @@ import abc
 import logging
 import re
 import traceback
+from pathlib import Path
 from typing import Optional, List
 
 from PyPDF2 import PdfReader
@@ -13,7 +14,11 @@ logger = logging.getLogger()
 
 class DocumentReader(abc.ABC):
   @abc.abstractmethod
-  def get_info(self):
+  def get_filename(self) -> str:
+    pass
+
+  @abc.abstractmethod
+  def get_metadata_info(self) -> Optional[DocumentInfo]:
     pass
 
   @abc.abstractmethod
@@ -23,11 +28,16 @@ class DocumentReader(abc.ABC):
 
 class PDFDocumentReader(DocumentReader):
   __file: PdfReader
+  __filename: str
   __info: Optional[DocumentInfo] = None
 
   def __init__(self, filepath: str):
     self.__file = PdfReader(filepath)
+    self.filename = Path(filepath).name
     self.__metadata_info()
+
+  def get_filename(self):
+    return self.filename
 
   def __metadata_info(self):
     meta = self.__file.metadata
@@ -49,7 +59,7 @@ class PDFDocumentReader(DocumentReader):
 
     self.__info = DocumentInfo(subject, title, keywords, self.__file.getNumPages(), author, year, producer)
 
-  def get_info(self):
+  def get_metadata_info(self):
     return self.__info
 
   def find_all_occurrences(self, to_find: str, keyword_offset: int = 250) -> List[Occurrence]:

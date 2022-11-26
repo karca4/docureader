@@ -10,8 +10,9 @@ def get_filenames_from_path(path: str) -> Generator[str, None, None]:
       yield file
 
 
-def write_file_result(filename: str, info: DocumentInfo, occurrences: List[Occurrence]):
-  with open(filename, "a") as f:
+def write_file_result(result_file_path: str, analyzed_filename: str, info: DocumentInfo, occurrences: List[Occurrence]):
+  with open(result_file_path, "a") as f:
+    f.write(f"Filename: {analyzed_filename}\n")
     f.write(f"Title: {info.title}\n")
     f.write(f"Subject: {info.subject}\n")
     f.write(f"Keywords: {info.keywords}\n")
